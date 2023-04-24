@@ -22,12 +22,12 @@ valueEquals item value' = value item == value'
 update :: Bool -> Node String -> IO ()
 update begin start = (if begin then return () else putStrLn "") >> putStrLn "Awaiting input..." >> getLine >>= handleStr
     where
-        handleStr input = case length' of
-            0 -> putStrLn "\nProgram terminated!" $> removeAll start >> return ()
-            _ -> case input of
-                '~' : substr -> case length' of
-                    1 -> putStrLn "\nDeleting list..." >> update' (removeAll start)
-                    _ -> if isValidString substr then putStrLn "\nRemoving item..." >> (update' =<< removeItem start substr valueEquals) else parseFail ()
+        handleStr input = if null input
+            then putStrLn "\nProgram terminated!" $> removeAll start >> return ()
+            else case input of
+                '~' : substr -> if null substr
+                    then putStrLn "\nDeleting list..." >> update' (removeAll start)
+                    else if isValidString substr then putStrLn "\nRemoving item..." >> (update' =<< removeItem start substr valueEquals) else parseFail ()
                 _ -> case input of
                     "l" -> putStrLn "\nLoop print not implemented!" >> update' start
                     "i" -> printList "\nIterator print..." printIterator
@@ -42,8 +42,6 @@ update begin start = (if begin then return () else putStrLn "") >> putStrLn "Awa
                     update' = update False
 
                     parseFail _ = putStrLn "\nCould not parse input!" >> update' start
-            where
-                length' = length input
 
 main :: IO ()
 main = update True Nothing
